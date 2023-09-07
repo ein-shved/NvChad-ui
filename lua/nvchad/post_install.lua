@@ -60,22 +60,24 @@ return function()
   api.nvim_buf_delete(0, { force = true }) -- close previously opened lazy window
 
   vim.schedule(function()
-    vim.cmd "MasonInstallAll"
+    if vim.fn.exists(":MasonInstallAll") > 0 then
+      vim.cmd "MasonInstallAll"
 
-    -- Keep track of which mason pkgs get installed
-    local packages = table.concat(vim.g.mason_binaries_list, " ")
+      -- Keep track of which mason pkgs get installed
+      local packages = table.concat(vim.g.mason_binaries_list, " ")
 
-    require("mason-registry"):on("package:install:success", function(pkg)
-      packages = string.gsub(packages, pkg.name:gsub("%-", "%%-"), "") -- rm package name
+      require("mason-registry"):on("package:install:success", function(pkg)
+        packages = string.gsub(packages, pkg.name:gsub("%-", "%%-"), "") -- rm package name
 
-      -- run above screen func after all pkgs are installed.
-      if packages:match "%S" == nil then
-        vim.schedule(function()
-          api.nvim_buf_delete(0, { force = true })
-          vim.cmd "echo '' | redraw" -- clear cmdline
-          screen()
-        end)
-      end
-    end)
+        -- run above screen func after all pkgs are installed.
+        if packages:match "%S" == nil then
+          vim.schedule(function()
+            api.nvim_buf_delete(0, { force = true })
+            vim.cmd "echo '' | redraw" -- clear cmdline
+            screen()
+          end)
+        end
+      end)
+    end
   end)
 end
